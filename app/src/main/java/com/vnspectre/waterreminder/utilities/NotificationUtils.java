@@ -11,10 +11,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Action;
 import android.support.v4.content.ContextCompat;
 
 import com.vnspectre.waterreminder.MainActivity;
 import com.vnspectre.waterreminder.R;
+import com.vnspectre.waterreminder.sync.ReminderTasks;
+import com.vnspectre.waterreminder.sync.WaterReminderIntentService;
 
 /**
  * Created by Spectre on 11/3/17.
@@ -25,6 +28,14 @@ public class NotificationUtils {
     private static final int WATER_REMINDER_PENDING_INTENT_ID = 113;
     private static final String WATER_REMINDER_NOTIFICATION_CHANNEL_ID = "reminder_notification_channel";
     private static final int WATER_REMINDER_NOTIFICATION_ID = 114;
+
+    private static final int ACTION_IGNORE_PENDING_INTENT_ID = 13;
+    private static final int ACTION_DRINK_PENDING_INTENT_ID = 14;
+
+    public static void clearAllNotification(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
+    }
 
     // This method will creates a notification for changing.
     // https://developer.android.com/training/notify-user/build-notification.html
@@ -46,6 +57,8 @@ public class NotificationUtils {
                         context.getString(R.string.charging_reminder_notification_body)))
                 .setDefaults(Notification.DEFAULT_VIBRATE)
                 .setContentIntent(contentIntent(context))
+                .addAction(drinkWaterAction(context))
+                .addAction(ignoreReminderAction(context))
                 .setAutoCancel(true);
 
         // Greater than JELLY_BEAN and lower than OREO, set the notification's priority to PRIORITY_HIGH.
@@ -55,6 +68,28 @@ public class NotificationUtils {
         }
 
         notificationManager.notify(WATER_REMINDER_NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    // Ignore (no) action notification.
+    private static Action ignoreReminderAction(Context context) {
+        Intent ignoreReminderIntent = new Intent(context, WaterReminderIntentService.class);
+
+        ignoreReminderIntent.setAction(ReminderTasks.ACTION_DISMISS_NOTIFICATION);
+        PendingIntent ignoreReminderPendingIntent = PendingIntent.getService(context, ACTION_IGNORE_PENDING_INTENT_ID, ignoreReminderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Action ignoreReminderAction = new Action(R.drawable.ic_cancel_black_24px, "No, thank!", ignoreReminderPendingIntent);
+        return ignoreReminderAction;
+    }
+
+    // Drink (yes) action notification.
+    private static Action drinkWaterAction(Context context) {
+        Intent incrementWaterCountIntent = new Intent(context, WaterReminderIntentService.class);
+
+        incrementWaterCountIntent.setAction(ReminderTasks.ACTION_INCREMENT_WATER_COUNT);
+        PendingIntent incrementWaterPendingIntent = PendingIntent.getService(context, ACTION_DRINK_PENDING_INTENT_ID, incrementWaterCountIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Action drinkWaterAction = new Action(R.drawable.ic_local_drink_black_24px, "I did it!", incrementWaterPendingIntent);
+        return drinkWaterAction;
     }
 
     // This pending intent should open up the MainActivity.

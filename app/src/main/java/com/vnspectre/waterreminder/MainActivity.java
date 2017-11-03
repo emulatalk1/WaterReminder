@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     public void testNotification(View view) {
+
         NotificationUtils.remindUserBecauseCharging(this);
     }
 }
