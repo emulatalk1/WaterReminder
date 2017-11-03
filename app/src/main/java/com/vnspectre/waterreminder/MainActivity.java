@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.vnspectre.waterreminder.sync.ReminderTasks;
 import com.vnspectre.waterreminder.sync.WaterReminderIntentService;
+import com.vnspectre.waterreminder.utilities.NotificationUtils;
 import com.vnspectre.waterreminder.utilities.PreferenceUtilities;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     // Updates the TextView to display the new charging reminder count from SharedPreferences.
     private void updateWaterCount() {
         int waterCount = PreferenceUtilities.getWaterCount(this);
-        mWaterCountDisplay.setText(waterCount + "");
+        mWaterCountDisplay.setText(String.valueOf(waterCount));
     }
 
     // Adds one to the water count and shows a Toast.
@@ -74,5 +75,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         } else if (PreferenceUtilities.KEY_CHARGING_REMINDER_COUNT.equals(key)) {
             updateChargingReminderCount();
         }
+    }
+
+    public void testNotification(View view) {
+        NotificationUtils.remindUserBecauseCharging(this);
     }
 }
