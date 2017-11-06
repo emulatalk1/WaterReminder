@@ -11,12 +11,12 @@ import android.preference.PreferenceManager;
 /**
  * This class contains utility methods which update water and charging counts in SharedPreferences.
  */
-public class PreferenceUtilities {
+public final class PreferenceUtilities {
 
     public static final String KEY_WATER_COUNT = "water-count";
     public static final String KEY_CHARGING_REMINDER_COUNT = "charging-reminder-count";
 
-    public static final int DEFAULT_COUNT = 0;
+    private static final int DEFAULT_COUNT = 0;
 
     synchronized private static void setWaterCount(Context context, int glassesOfWater) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

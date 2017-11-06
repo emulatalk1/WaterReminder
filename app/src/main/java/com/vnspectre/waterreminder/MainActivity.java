@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vnspectre.waterreminder.sync.ReminderTasks;
+import com.vnspectre.waterreminder.sync.ReminderUtilities;
 import com.vnspectre.waterreminder.sync.WaterReminderIntentService;
 import com.vnspectre.waterreminder.utilities.NotificationUtils;
 import com.vnspectre.waterreminder.utilities.PreferenceUtilities;
@@ -36,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         // Set the original values in the UI.
         updateWaterCount();
         updateChargingReminderCount();
+
+        // Schedule the charging reminder.
+        ReminderUtilities.scheduleChargingReminder(this);
 
         // Setup the shared preference listener.
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
