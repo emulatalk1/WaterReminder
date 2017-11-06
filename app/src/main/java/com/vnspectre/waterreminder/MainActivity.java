@@ -1,6 +1,9 @@
 package com.vnspectre.waterreminder;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +27,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     private Toast mToast;
 
+    ChargingBroadCastReceiver mChargingReceiver;
+    IntentFilter mChargingFilter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +50,27 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         // Setup the shared preference listener.
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.registerOnSharedPreferenceChangeListener(this);
+
+
+        // Setup and register the broadcast receiver.
+        mChargingFilter = new IntentFilter();
+        mChargingReceiver = new ChargingBroadCastReceiver();
+
+        // This sets up an intent filter which will trigger when the charging state changes.
+        mChargingFilter.addAction(Intent.ACTION_POWER_CONNECTED);
+        mChargingFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mChargingReceiver, mChargingFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mChargingReceiver);
     }
 
     // Updates the TextView to display the new water count from SharedPreferences.
@@ -78,6 +105,29 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             updateWaterCount();
         } else if (PreferenceUtilities.KEY_CHARGING_REMINDER_COUNT.equals(key)) {
             updateChargingReminderCount();
+        }
+    }
+
+    // Change color power from black to pink when phone is plugged.
+    private void showCharging(boolean isCharging){
+        if (isCharging) {
+            // True is pink
+            mChargingImageView.setImageResource(R.drawable.ic_power_pink_80px);
+        } else {
+            mChargingImageView.setImageResource(R.drawable.ic_power_grey_80px);
+        }
+    }
+
+    // BroadCast Receiver
+    private class ChargingBroadCastReceiver extends BroadcastReceiver {
+        // Intent.ACTION_POWER_CONNECTED. If It matches, it's charging. If it doesn't match, it's not charging.
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            boolean isCharging = (action.equals(Intent.ACTION_POWER_CONNECTED));
+
+            // Update to UI.
+            showCharging(isCharging);
         }
     }
 
